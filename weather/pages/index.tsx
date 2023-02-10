@@ -1,97 +1,79 @@
-import { useState, useEffect } from "react";
 import Head from "next/head";
-import { Paper, TextInput, Button, Text, Group } from "@mantine/core";
+import Image from "next/legacy/image";
+import axios from "axios";
+import { useState } from "react";
+import { BsSearch } from "react-icons/bs";
+import Weather from "../components/Weather.jsx";
+import Spinner from "../components/Spinner";
 
 export default function Home() {
   const [weather, setWeather] = useState<any>({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setloading] = useState(false);
 
   const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
-  useEffect(() => {
-    async function getWeather(searchTerm) {
-      try {
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${searchTerm}&appid=${API_KEY}&units=imperial`
-        );
-        const data = await response.json();
-        console.log(data);
-        if (data?.cod === "400") throw data;
-        setWeather(data);
-      } catch (err) {
-        console.log(err);
-      }
-    }
+  // const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const API_URL = `https://api.openweathermap.org/data/2.5/weather?q=${searchTerm}&units=imperial&appid=${API_KEY}`;
+  const fetchWeather = (e: any) => {
+    e.preventDefault();
+    setloading(true);
+    axios
+      .get(API_URL)
+      .then((response) => {
+        setWeather(response.data);
+        // console.log(response.data);
+      })
+      .catch((error) => {
+        console.log(error.response.data);
+      });
+    setSearchTerm("");
+    setloading(false);
+  };
 
-    getWeather(searchTerm);
-    console.log(weather);
-  }, []);
-
-  function onKeyDown(event) {
+  function onKeyDown(event: any) {
     if (event.key === "Enter") {
       setSearchTerm(event.target.value);
+      setWeather(event.target.value);
     }
   }
 
-  return (
-    <div
-      style={{
-        position: "static",
-        height: "100vh",
-        backgroundImage:
-          "url('https://news-cdn.softpedia.com/images/news2/YoWindow-for-iOS-a-User-Friendly-Animated-Weather-App-18.png')",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          transform: "translate(-50%, -50%)",
-        }}
-      >
+  if (loading) {
+    return <Spinner />;
+  } else {
+    return (
+      <div>
         <Head>
           <title>Weather</title>
         </Head>
-        <h1>Weather App</h1>
-        <Paper withBorder p="lg" style={{ maxWidth: "500px" }}>
-          <Group position="apart">
-            <Text size="xl" weight={500}>
-              Get Weather!
-            </Text>
-          </Group>
-          <Group position="apart">
-            <Text size="lg">Enter the City name to get the weather below!</Text>
-          </Group>
-          <Group position="apart" mb="xs">
-            <TextInput
-              // label="City Name"
-              type="text"
-              placeholder="Search here..."
-              onChange={(e) => setWeather(e.target.value)}
-              onKeyDown={(e) => onKeyDown(e)}
-            ></TextInput>
-          </Group>
-          <Group>
-            <Button variant="gradient" size="md" onClick={() => getWeather()}>
-              Get Weather
-            </Button>
-          </Group>
-        </Paper>
+        <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/40 z-[1]" />
+        {/* <Image
+          src="https://images.unsplash.com/photo-1601134467661-3d775b999c8b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1675&q=80"
+          alt="weather"
+          layout="fill"
+          className="object-cover"
+        /> */}
+        <div className="relative flex justify-between items-center max-w-[500px] w-full m-auto pt-4 text-white z-10">
+          <form
+            onSubmit={fetchWeather}
+            className="flex justify-between items-center w-full m-auto p-3 bg-transaprent border border-gray-300 text-white rounded-2xl"
+          >
+            <div>
+              <input
+                className="bg-transparent
+              border-none text-white focus:outline-none text-2xl"
+                type="text"
+                placeholder="Search City..."
+                onChange={(e) => setWeather(e.target.value)}
+                onKeyDown={onKeyDown}
+              />
+            </div>
+            <button onClick={fetchWeather}>
+              <BsSearch size={20} />
+            </button>
+          </form>
+        </div>
+        {weather.main && <Weather data={weather} />}
       </div>
-      {/* <input
-        type="text"
-        placeholder="Search here..."
-        onChange={(e) => setWeather(e.target.value)}
-        onKeyDown={(e) => onKeyDown(e)}
-      /> */}
-      {/* <button onClick={() => setWeather(searchTerm)}>Get Weather</button> */}
-      {/* {data.map((item) => {
-        return;
-        <div>item.name, item.main</div>;
-      })} */}
-      {Object.keys(weather).length !== 0 ? <> </> : null}
-      <Group>{/* <Text>{weather.name} Weather</Text> */}</Group>
-      <Group>{/* <Text>currently {weather.main.temp} &deg;F</Text> */}</Group>
-    </div>
-  );
+    );
+  }
 }

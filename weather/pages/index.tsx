@@ -13,7 +13,7 @@ export default function Home() {
 
   const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
   // const API_URL = process.env.NEXT_PUBLIC_API_URL;
-  const API_URL = `https://api.openweathermap.org/data/2.5/weather?q=${searchTerm}&units=imperial&appid=${API_KEY}`;
+  const API_URL = `https://api.openweathermap.org/data/2.5/weather?q=${searchTerm}&units=metric&appid=${API_KEY}`;
   const fetchWeather = (e: any) => {
     e.preventDefault();
     setloading(true);

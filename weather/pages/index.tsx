@@ -62,7 +62,7 @@ export default function Home() {
                 className="bg-transparent
               border-none text-white focus:outline-none text-2xl"
                 type="text"
-                placeholder="Search for a City..."
+                placeholder="Enter a City Name..."
                 onChange={(e) => setWeather(e.target.value)}
                 onKeyDown={onKeyDown}
               />
